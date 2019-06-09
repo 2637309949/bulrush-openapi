@@ -24,7 +24,7 @@ type (
 		bulrush.PNBase
 		URLPrefix string
 		apis      []Handler
-		Auth      func(appid string) (*OpenAPI, error)
+		Auth      func(appid string) (*AppKeySecret, error)
 	}
 	// AppKeySecret app key secret
 	AppKeySecret struct {
@@ -58,7 +58,7 @@ type (
 		Mess map[string]interface{}
 	}
 	// Voke func
-	Voke func(*OpenAPI, *CRP) (*CRPRet, error)
+	Voke func(*AppKeySecret, *CRP) (*CRPRet, error)
 
 	// Handler api handler
 	Handler struct {
@@ -145,7 +145,7 @@ func (openapi *OpenAPI) findVoke(method string, version string) (Voke, error) {
 	return nil, nil
 }
 
-func (openapi *OpenAPI) authenticate(puData *CRP, c *gin.Context) (*OpenAPI, error) {
+func (openapi *OpenAPI) authenticate(puData *CRP, c *gin.Context) (*AppKeySecret, error) {
 	var puJSON map[string]interface{}
 	var puKeys = make([]string, 0, len(puJSON))
 	c.BindJSON(&puJSON)

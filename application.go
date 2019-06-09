@@ -156,7 +156,8 @@ func (openapi *OpenAPI) findVoke(method string, version string) (Voke, error) {
 	if h == nil {
 		return nil, fmt.Errorf("Not existedd %s %s", method, version)
 	}
-	return h.(Voke), nil
+	v := h.(Handler).Voke
+	return v, nil
 }
 
 func (openapi *OpenAPI) authenticate(puData *CRP, c *gin.Context) (*AppKeySecret, error) {

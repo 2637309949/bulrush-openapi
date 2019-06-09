@@ -150,7 +150,13 @@ func (openapi *OpenAPI) requestHandle(c *gin.Context) {
 }
 
 func (openapi *OpenAPI) findVoke(method string, version string) (Voke, error) {
-	return nil, nil
+	h := funk.Find(openapi.apis, func(handler Handler) bool {
+		return (handler.Name == method) && (handler.Version == version)
+	})
+	if h == nil {
+		return nil, fmt.Errorf("Not existedd %s %s", method, version)
+	}
+	return h.(Voke), nil
 }
 
 func (openapi *OpenAPI) authenticate(puData *CRP, c *gin.Context) (*AppKeySecret, error) {

@@ -4,7 +4,6 @@ go 1.12
 
 require (
 	github.com/2637309949/bulrush v0.0.0-20190609040432-559afa401090
-
 	github.com/gin-gonic/gin v1.4.0
 )
 

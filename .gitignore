@@ -1,0 +1,17 @@
+.idea
+.vscode
+.history
+
+pids
+
+/logs/*
+!/logs/.gitkeep
+
+build
+vendor
+node_modules
+
+/vendor/*
+!/vendor/vendor.json
+
+tmp

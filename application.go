@@ -82,7 +82,8 @@ type (
 // biz_content    String           是     请求参数的集合，最大长度不限，除公共参数外所有请求参数都必须放在这个参数中传递
 func (openapi *OpenAPI) Plugin() bulrush.PNRet {
 	return func(cfg *bulrush.Config, router *gin.RouterGroup) *OpenAPI {
-		router.POST(openapi.URLPrefix, openapi.reqHandle)
+		router.GET(openapi.URLPrefix, openapi.requestHandle)
+		router.POST(openapi.URLPrefix, openapi.requestHandle)
 		return openapi
 	}
 }
@@ -100,19 +101,26 @@ func (openapi *OpenAPI) RegistHandler(h Handler) (bool, error) {
 }
 
 // handle http request
-func (openapi *OpenAPI) reqHandle(c *gin.Context) {
+func (openapi *OpenAPI) requestHandle(c *gin.Context) {
 	// params check
 	var puData CRP
-	if err := c.ShouldBindQuery(&puData); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		c.Abort()
-		return
+	if c.Request.Method != "POST" {
+		if err := c.ShouldBindQuery(&puData); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			c.Abort()
+			return
+		}
+	} else {
+		if err := c.ShouldBind(&puData); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			c.Abort()
+			return
+		}
 	}
 	// auth check
 	appKeySecret, err := openapi.authenticate(&puData, c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		c.Abort()
 		c.Abort()
 		return
 	}

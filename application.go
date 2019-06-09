@@ -16,8 +16,8 @@ import (
 )
 
 type (
-	// Openapi for third party dev
-	Openapi struct {
+	// OpenAPI for third party dev
+	OpenAPI struct {
 		URLPrefix string
 		bulrush.PNBase
 	}
@@ -52,7 +52,7 @@ type (
 // notify_url     String           否     服务器主动通知商户服务器里指定的页面http/https路径。
 // app_auth_token String           否     应用授权
 // biz_content    String           是     请求参数的集合，最大长度不限，除公共参数外所有请求参数都必须放在这个参数中传递
-func (openapi *Openapi) Plugin() bulrush.PNRet {
+func (openapi *OpenAPI) Plugin() bulrush.PNRet {
 	return func(cfg *bulrush.Config, router *gin.RouterGroup) {
 		router.GET(openapi.URLPrefix, func(c *gin.Context) {
 			var puData Params

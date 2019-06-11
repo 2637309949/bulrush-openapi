@@ -1,12 +1,4 @@
-# bulrush-logger
-Provides logging capabilities.
-- EXAMPLE:   
-```go
-app.Use(
-    &logger.LoggerWriter{},
-)
-```
-
+# bulrush-openapi
 ## MIT License
 
 Copyright (c) 2018-2020 Double

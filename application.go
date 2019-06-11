@@ -9,6 +9,8 @@
 package openapi
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"sort"
@@ -24,12 +26,14 @@ type (
 		bulrush.PNBase
 		URLPrefix string
 		apis      []Handler
-		Auth      func(appid string) (*AppKeySecret, error)
+		Auth      func(appid string) (*AppInfo, error)
 	}
-	// AppKeySecret app key secret
-	AppKeySecret struct {
-		AppKey    string
-		AppSecret string
+	// AppInfo app key secret
+	AppInfo struct {
+		AppID     string
+		PublicKey string
+		// JUST FOR TEST
+		PrivateKey string
 	}
 	// CRP Common request parameter
 	CRP struct {
@@ -58,7 +62,7 @@ type (
 		Mess map[string]interface{}
 	}
 	// Voke func
-	Voke func(*AppKeySecret, *CRP) (*CRPRet, error)
+	Voke func(*AppInfo, *CRP) (*CRPRet, error)
 
 	// Handler api handler
 	Handler struct {
@@ -68,7 +72,7 @@ type (
 	}
 )
 
-// Plugin for Recovery
+// Plugin for OpenAPI
 // Request Params
 // ihgjb 1111  sefld134r34eruwiru2323rjisfjsd
 // return_url     String           否     HTTP/HTTPS开头字符串 https://xx.xx.com/xx
@@ -138,7 +142,6 @@ func (openapi *OpenAPI) requestHandle(c *gin.Context) {
 		c.Abort()
 		return
 	}
-
 	if ret.ReturnURL != "" {
 		c.Redirect(http.StatusMovedPermanently, "/auth/login")
 		c.Abort()
@@ -160,21 +163,44 @@ func (openapi *OpenAPI) findVoke(method string, version string) (Voke, error) {
 	return v, nil
 }
 
-func (openapi *OpenAPI) authenticate(puData *CRP, c *gin.Context) (*AppKeySecret, error) {
-	var puJSON map[string]interface{}
-	var puKeys = make([]string, 0, len(puJSON))
-	c.BindJSON(&puJSON)
-
-	// check appid
-	appKeySecret, err := openapi.Auth(puData.AppID)
-	if err != nil {
-		return nil, err
+func (openapi *OpenAPI) authenticate(puData *CRP, c *gin.Context) (*AppInfo, error) {
+	if appKeySecret, err := openapi.Auth(puData.AppID); err == nil {
+		if err := rsaVerify(puData, appKeySecret); err != nil {
+			return nil, err
+		}
+		return appKeySecret, nil
 	}
+	return nil, errors.New("app not found")
+}
 
-	// check rsa
+func rsaVerify(puData *CRP, appKeySecret *AppInfo) error {
+	var puJSON map[string]string
+	var puKeys = make([]string, 0, len(puJSON))
+	puByte, _ := json.Marshal(puData)
+	json.Unmarshal(puByte, &puJSON)
+	sign := puJSON["sign"]
 	for k := range puJSON {
-		puKeys = append(puKeys, k)
+		if k != "sign" {
+			puKeys = append(puKeys, k)
+		}
 	}
 	sort.Strings(puKeys)
-	return appKeySecret, nil
+	var signString = ""
+	for _, k := range puKeys {
+		if signString != "" {
+			signString = signString + "&" + k + "=" + puJSON[k]
+		} else {
+			signString = signString + k + "=" + puJSON[k]
+		}
+	}
+	pubkey, err := pubKeyFromByte([]byte(appKeySecret.PublicKey))
+	if err != nil {
+		return err
+	}
+	// priKey, err := priKeyFromByte([]byte(appKeySecret.PrivateKey))
+	// base64sign, err := rsaSignPKCS1v15(priKey, []byte(signString))
+	if err := rsaVerifyPKCS1v15(pubkey, []byte(signString), sign); err != nil {
+		return err
+	}
+	return nil
 }

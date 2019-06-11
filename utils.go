@@ -15,9 +15,11 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"sort"
 )
 
 func priKeyFromByte(privateKey []byte) (*rsa.PrivateKey, error) {
@@ -70,4 +72,26 @@ func rsaVerifyPKCS1v15(key *rsa.PublicKey, data []byte, base64Sign string) error
 	descB64, err := base64.StdEncoding.DecodeString(base64Sign)
 	err = rsa.VerifyPKCS1v15(key, crypto.SHA256, hash.Sum(nil), descB64)
 	return err
+}
+
+func map2SignString(puData interface{}) string {
+	var puJSON map[string]string
+	var puKeys = make([]string, 0, len(puJSON))
+	puByte, _ := json.Marshal(puData)
+	json.Unmarshal(puByte, &puJSON)
+	for k := range puJSON {
+		if k != "sign" {
+			puKeys = append(puKeys, k)
+		}
+	}
+	sort.Strings(puKeys)
+	var signString = ""
+	for _, k := range puKeys {
+		if signString != "" {
+			signString = signString + "&" + k + "=" + puJSON[k]
+		} else {
+			signString = signString + k + "=" + puJSON[k]
+		}
+	}
+	return signString
 }

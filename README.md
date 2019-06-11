@@ -1,4 +1,39 @@
 # bulrush-openapi
+    RSA 算法 RSA PKCS#1, SHA256
+
+```go
+// Init OpenApi
+// OpenAPI Plugin init
+var OpenAPI = &openapi.OpenAPI{
+    URLPrefix: "/gateway",
+    // Auth AppID
+	Auth: func(appid string) (*openapi.AppInfo, error) {
+		return &openapi.AppInfo{
+			AppID: "xxx",
+			PublicKey: `
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDaYoospKXldKm+/fdGh8b5Jbq4
+PSrIELjHR/F6+zYExr7w0XGWC6/1Nj2Da3EWYnWo+n6URMqeyCnd09SvEmavpkUW
+d/4AhjZIvO42PBy9x/wFrqgU/KUqZ2r+AWFJJZgSA9IuBEqjZxsu1XTKiT7v5U7N
+WlboP5QLPPffz92sUwIDAQAB
+			`,
+		}, nil
+	},
+}
+// Regist a handler
+// openapi is a inject from bulrush, see my bulrush-template for more detail info
+api.RegistHandler(openapi.Handler{
+    Name:    "test.hello",
+    Version: "1.0",
+    Voke: func(*openapi.AppInfo, *openapi.CRP) (*openapi.CRPRet, error) {
+        return &openapi.CRPRet{
+            Body: map[string]interface{}{
+                "a": "a",
+                "b": "b",
+            },
+        }, nil
+    },
+})
+```
 ## MIT License
 
 Copyright (c) 2018-2020 Double

@@ -69,7 +69,7 @@ type (
 	}
 )
 
-// Plugin for Recovery
+// Plugin for OpenAPI
 // Request Params
 // app_id         String           是     分配给开发者的应用ID
 // method         String           是     接口名称 xxx.xxx.xx.xx

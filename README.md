@@ -1,5 +1,37 @@
 # bulrush-openapi
-    RSA 算法 RSA PKCS#1, SHA256
+    // RSA 算法 RSA PKCS#1, SHA256
+    Plugin for OpenAPI
+    Request Params
+    app_id         String           是     分配给开发者的应用ID
+    method         String           是     接口名称 xxx.xxx.xx.xx
+    format         String           否     仅支持JSON JSON
+    return_url     String           否     HTTP/HTTPS开头字符串 https://xx.xx.com/xx
+    charset        String           是     请求使用的编码格式，如utf 8,gbk,gb2312等 utf 8
+    sign_type      String           是     生成签名字符串所使用的签名算法类型，RSA2和RSA，目前RSA
+    sign           String           是     请求参数的签名串
+    timestamp      String           是     发送请求的时间，格式"yyyy MM dd HH:mm:ss" 2014 07 24 03:07:50
+    version        String           是     调用的接口版本，固定为：1.0 1.0
+    notify_url     String           否     服务器主动通知商户服务器里指定的页面http/https路径。
+    app_auth_token String           否     应用授权
+    biz_content    String           是     请求参数的集合，最大长度不限，除公共参数外所有请求参数都必须放在这个参数中传递
+## Example
+```shell
+curl -H "Content-Type:application/json" -H "Data_Type:msg" -X POST --data  \
+{
+	"app_id": "xxx",
+	"method": "test.hello",
+	"format": "xxx",
+	"return_url": "xxx",
+	"charset": "xxx",
+	"sign": "uj0Jm/MFqP9bz+ZBCJuTCwQp4Cmr3DJS/mAxbyIK1xS0oUmgX7OPYK4i/PSJwamZsTNAvswfRWQAFpa5550fTQZ5HNHH91Fz3cIeUOv/YWoHkku3BJbgZaSlClSBNqlhqhwmci6bJzGans2YSRP1VaNI3ZPSedDUFPYKQuyFJjQ=",
+	"sign_type": "xxx",
+	"timestamp": "xxx",
+	"notify_url": "xxx",
+	"biz_content": "xxx",
+	"version": "1.0"
+} http://127.0.0.1:8080/api/v1/gateway?accessToken=DEBUG
+```
+
 
 ```go
 // Init OpenApi

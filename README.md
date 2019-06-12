@@ -1,7 +1,6 @@
 # bulrush-openapi
-    // RSA 算法 RSA PKCS#1, SHA256
-    Plugin for OpenAPI
-    Request Params
+    插件涉及的算法 RSA PKCS#1, 哈希使用SHA256
+## 参数
     app_id         String           是     分配给开发者的应用ID
     method         String           是     接口名称 xxx.xxx.xx.xx
     format         String           否     仅支持JSON JSON
@@ -23,22 +22,23 @@ curl -H "Content-Type:application/json" -H "Data_Type:msg" -X POST --data  \
 	"format": "xxx",
 	"return_url": "xxx",
 	"charset": "xxx",
-	"sign": "uj0Jm/MFqP9bz+ZBCJuTCwQp4Cmr3DJS/mAxbyIK1xS0oUmgX7OPYK4i/PSJwamZsTNAvswfRWQAFpa5550fTQZ5HNHH91Fz3cIeUOv/YWoHkku3BJbgZaSlClSBNqlhqhwmci6bJzGans2YSRP1VaNI3ZPSedDUFPYKQuyFJjQ=",
+	"sign": "uj0Jm/MFqP9bz+ZBCJuTCwQp4Cmr3DJS/mAxbyIK1xS0oUmgX7OPYK4i/PSJwam \
+        ZsTNAvswfRWQAFpa5550fTQZ5HNHH91Fz3cIeUOv/YWoHkku3BJbgZaSlClSBNqlhqhwm \
+        ci6bJzGans2YSRP1VaNI3ZPSedDUFPYKQuyFJjQ=",
 	"sign_type": "xxx",
 	"timestamp": "xxx",
 	"notify_url": "xxx",
 	"biz_content": "xxx",
 	"version": "1.0"
-} http://127.0.0.1:8080/api/v1/gateway?accessToken=DEBUG
+} \
+http://127.0.0.1:8080/api/v1/gateway?accessToken=DEBUG
 ```
 
 
 ```go
-// Init OpenApi
-// OpenAPI Plugin init
-var OpenAPI = &openapi.OpenAPI{
+// Mount Plugin
+app.Use(&openapi.OpenAPI{
     URLPrefix: "/gateway",
-    // Auth AppID
 	Auth: func(appid string) (*openapi.AppInfo, error) {
 		return &openapi.AppInfo{
 			AppID: "xxx",
@@ -50,21 +50,22 @@ WlboP5QLPPffz92sUwIDAQAB
 			`,
 		}, nil
 	},
-}
-// Regist a handler
-// openapi is a inject from bulrush, see my bulrush-template for more detail info
-api.RegistHandler(openapi.Handler{
-    Name:    "test.hello",
-    Version: "1.0",
-    Voke: func(*openapi.AppInfo, *openapi.CRP) (*openapi.CRPRet, error) {
-        return &openapi.CRPRet{
-            Body: map[string]interface{}{
-                "a": "a",
-                "b": "b",
-            },
-        }, nil
-    },
 })
+// Regist a handler
+app.Use(bulrush.PNQuick(func(api *openapi.OpenAPI) {
+    api.RegistHandler(openapi.Handler{
+        Name:    "test.hello",
+        Version: "1.0",
+        Voke: func(*openapi.AppInfo, *openapi.CRP) (*openapi.CRPRet, error) {
+            return &openapi.CRPRet{
+                Body: map[string]interface{}{
+                    "a": "a",
+                    "b": "b",
+                },
+            }, nil
+        },
+    })
+}))
 ```
 ## MIT License
 

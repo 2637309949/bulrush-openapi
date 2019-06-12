@@ -9,6 +9,7 @@
 package openapi
 
 import (
+	"bytes"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
@@ -19,6 +20,8 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"sort"
 
 	"github.com/gin-gonic/gin"
@@ -124,4 +127,21 @@ func rsaVerify(puData *CRP, appKeySecret *AppInfo) error {
 	}
 	rushLogger.Warn("pubKeyFromByte error")
 	return errors.New("read application public key error")
+}
+
+func postRequest(url string, data interface{}) ([]byte, error) {
+	buf, err := json.Marshal(data)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(buf))
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return []byte{}, err
+	}
+	defer resp.Body.Close()
+	if resp.Status != "200" {
+		return []byte{}, errors.New("status error")
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	return body, nil
 }

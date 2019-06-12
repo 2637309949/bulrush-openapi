@@ -136,13 +136,23 @@ func (openapi *OpenAPI) requestHandle(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, ret.RetURL)
 		return
 	}
-	if ret.Noti != nil {
-		openapi.noti(c, ret.Noti)
+	if ret.Noti != nil && ret.Noti.URL != "" {
+		err := openapi.noti(c, ret.Noti)
+		if err != nil {
+			rushLogger.Error("postRequest error %s", err.Error())
+		}
 	}
 	c.JSON(http.StatusOK, ret.Body)
 }
 
-func (openapi *OpenAPI) noti(c *gin.Context, noti *Noti) {
+// Post message twice
+func (openapi *OpenAPI) noti(c *gin.Context, noti *Noti) error {
+	_, err := postRequest(noti.URL, noti.News)
+	if err != nil {
+		_, err := postRequest(noti.URL, noti.News)
+		return err
+	}
+	return nil
 }
 
 func (openapi *OpenAPI) findVoke(method string, version string) (Voke, error) {

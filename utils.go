@@ -20,6 +20,8 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+
+	"github.com/gin-gonic/gin"
 )
 
 func priKeyFromByte(privateKey []byte) (*rsa.PrivateKey, error) {
@@ -94,4 +96,32 @@ func map2SignString(puData interface{}) string {
 		}
 	}
 	return signString
+}
+
+func getForm(c *gin.Context) (*CRP, error) {
+	puData := &CRP{}
+	if c.Request.Method != "POST" {
+		if err := c.ShouldBindQuery(puData); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := c.ShouldBind(puData); err != nil {
+			return nil, err
+		}
+	}
+	return puData, nil
+}
+
+func rsaVerify(puData *CRP, appKeySecret *AppInfo) error {
+	sign := puData.Sign
+	signString := map2SignString(puData)
+	if pubkey, err := pubKeyFromByte([]byte(appKeySecret.PublicKey)); err == nil {
+		if err := rsaVerifyPKCS1v15(pubkey, []byte(signString), sign); err != nil {
+			rushLogger.Warn("rsaVerifyPKCS1v15 error %s", err.Error())
+			return errors.New("sign not match")
+		}
+		return nil
+	}
+	rushLogger.Warn("pubKeyFromByte error")
+	return errors.New("read application public key error")
 }

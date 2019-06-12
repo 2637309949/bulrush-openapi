@@ -104,20 +104,6 @@ func (openapi *OpenAPI) RegistHandler(h Handler) (bool, error) {
 	return true, nil
 }
 
-func getForm(c *gin.Context) (*CRP, error) {
-	puData := &CRP{}
-	if c.Request.Method != "POST" {
-		if err := c.ShouldBindQuery(puData); err != nil {
-			return nil, err
-		}
-	} else {
-		if err := c.ShouldBind(puData); err != nil {
-			return nil, err
-		}
-	}
-	return puData, nil
-}
-
 // handle http request
 func (openapi *OpenAPI) requestHandle(c *gin.Context) {
 	puData, err := getForm(c)
@@ -179,18 +165,4 @@ func (openapi *OpenAPI) auth(puData *CRP, c *gin.Context) (*AppInfo, error) {
 		return appKeySecret, nil
 	}
 	return nil, errors.New("app not found")
-}
-
-func rsaVerify(puData *CRP, appKeySecret *AppInfo) error {
-	sign := puData.Sign
-	signString := map2SignString(puData)
-	if pubkey, err := pubKeyFromByte([]byte(appKeySecret.PublicKey)); err == nil {
-		if err := rsaVerifyPKCS1v15(pubkey, []byte(signString), sign); err != nil {
-			rushLogger.Warn("rsaVerifyPKCS1v15 error %s", err.Error())
-			return errors.New("sign not match")
-		}
-		return nil
-	}
-	rushLogger.Warn("pubKeyFromByte error")
-	return errors.New("read application public key error")
 }

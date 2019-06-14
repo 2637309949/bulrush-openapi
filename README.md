@@ -34,6 +34,36 @@ curl -H "Content-Type:application/json" -H "Data_Type:msg" -X POST --data  \
 http://127.0.0.1:8080/api/v1/gateway?accessToken=DEBUG
 ```
 
+## RSA Generate Key
+### Note
+    // PKCS1 header format
+    // For private key
+    -----BEGIN RSA PRIVATE KEY-----
+    -----END RSA PRIVATE KEY-----
+    // For public key
+    -----BEGIN RSA PUBLIC KEY-----
+    -----END RSA PUBLIC KEY-----
+
+    // and PKCS8 header format
+    // For private key
+    -----BEGIN PRIVATE KEY-----
+    -----END PRIVATE KEY-----
+    // For public key 
+    -----BEGIN PUBLIC KEY-----
+    -----END PUBLIC KEY-----
+
+### Generate private key
+```shell
+openssl genrsa -out private.pem 1024
+```
+### Generate public key
+```shell
+openssl rsa -in private.pem -pubout > public.pem
+```
+### PKCS8 public key to PKCS1 public key format
+```shell
+openssl rsa -pubin -in public.pem -RSAPublicKey_out
+```
 
 ```go
 // Mount Plugin

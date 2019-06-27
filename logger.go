@@ -4,13 +4,9 @@
 
 package openapi
 
-import "github.com/2637309949/bulrush-addition/logger"
+import (
+	addition "github.com/2637309949/bulrush-addition"
+)
 
 // rushLogger just for console log
-var rushLogger = logger.CreateLogger(logger.SILLYLevel, nil,
-	[]*logger.Transport{
-		&logger.Transport{
-			Level: logger.SILLYLevel,
-		},
-	},
-)
+var rushLogger = addition.RushLogger

@@ -66,7 +66,7 @@ type (
 )
 
 // Plugin for OpenAPI
-func (api *OpenAPI) Plugin() bulrush.PNRet {
+func (api *OpenAPI) Plugin() interface{} {
 	return func(cfg *bulrush.Config, router *gin.RouterGroup) *OpenAPI {
 		funk.ForEach([]func(string, ...gin.HandlerFunc) gin.IRoutes{router.GET, router.POST}, func(httpMethod func(string, ...gin.HandlerFunc) gin.IRoutes) {
 			httpMethod(api.URLPrefix, api.requestHandle)

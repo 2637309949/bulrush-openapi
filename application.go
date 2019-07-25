@@ -89,25 +89,37 @@ func (api *OpenAPI) requestHandle(c *gin.Context) {
 	puData, err := getForm(c)
 	if err != nil {
 		rushLogger.Warn("getForm error %s", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"message": "Internal Server Error",
+			"stack":   err.Error(),
+		})
 		return
 	}
 	appKeySecret, err := api.appAuth(puData, c)
 	if err != nil {
 		rushLogger.Warn("appAuth error %s", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"message": "Internal Server Error",
+			"stack":   err.Error(),
+		})
 		return
 	}
 	voke, err := api.findVoke(puData.Method, puData.Version)
 	if err != nil {
 		rushLogger.Warn("findVoke error %s", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"message": "Internal Server Error",
+			"stack":   err.Error(),
+		})
 		return
 	}
 	ret, err := voke(appKeySecret, puData)
 	if err != nil {
 		rushLogger.Warn("voke error %s", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"message": "Internal Server Error",
+			"stack":   err.Error(),
+		})
 		return
 	}
 	if ret.Noti != nil && ret.Noti.URL != "" {

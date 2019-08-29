@@ -90,8 +90,7 @@ func (api *OpenAPI) requestHandle(c *gin.Context) {
 	if err != nil {
 		rushLogger.Warn("getForm error %s", err.Error())
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Internal Server Error",
-			"stack":   err.Error(),
+			"message": err.Error(),
 		})
 		return
 	}
@@ -99,8 +98,7 @@ func (api *OpenAPI) requestHandle(c *gin.Context) {
 	if err != nil {
 		rushLogger.Warn("appAuth error %s", err.Error())
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Internal Server Error",
-			"stack":   err.Error(),
+			"message": err.Error(),
 		})
 		return
 	}
@@ -108,8 +106,7 @@ func (api *OpenAPI) requestHandle(c *gin.Context) {
 	if err != nil {
 		rushLogger.Warn("findVoke error %s", err.Error())
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Internal Server Error",
-			"stack":   err.Error(),
+			"message": err.Error(),
 		})
 		return
 	}
@@ -117,8 +114,7 @@ func (api *OpenAPI) requestHandle(c *gin.Context) {
 	if err != nil {
 		rushLogger.Warn("voke error %s", err.Error())
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": "Internal Server Error",
-			"stack":   err.Error(),
+			"message": err.Error(),
 		})
 		return
 	}

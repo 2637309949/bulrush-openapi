@@ -28,8 +28,8 @@ type (
 		// JUST FOR TEST
 		PrivateKey string
 	}
-	// CRP defines Common request parameter
-	CRP struct {
+	// Form defines Common request parameter
+	Form struct {
 		AppID        string `form:"app_id" json:"app_id" xml:"app_id" binding:"required"`
 		Method       string `form:"method" json:"method" xml:"method" binding:"required"`
 		Format       string `form:"format" json:"format" xml:"format"`
@@ -43,8 +43,8 @@ type (
 		AppAuthToken string `form:"app_auth_token" json:"app_auth_token" xml:"app_auth_token"`
 		BizContent   string `form:"biz_content" json:"biz_content" xml:"biz_content" binding:"required"`
 	}
-	// CRPRet defines return after voke func
-	CRPRet struct {
+	// FormRet defines return after voke func
+	FormRet struct {
 		RetURL string
 		Noti   *Noti
 		Body   interface{}
@@ -55,7 +55,7 @@ type (
 		News map[string]interface{}
 	}
 	// Voke defines handle call
-	Voke func(*AppInfo, *CRP) (*CRPRet, error)
+	Voke func(*AppInfo, *Form) (*FormRet, error)
 	// Handler api handler
 	Handler struct {
 		Name    string
@@ -66,29 +66,30 @@ type (
 
 // Plugin for OpenAPI
 func (api *OpenAPI) Plugin(cfg *bulrush.Config, router *gin.RouterGroup) *OpenAPI {
+	// register http handlers
 	funk.ForEach([]func(string, ...gin.HandlerFunc) gin.IRoutes{router.GET, router.POST}, func(httpMethod func(string, ...gin.HandlerFunc) gin.IRoutes) {
-		httpMethod(api.URLPrefix, api.requestHandle)
+		httpMethod(api.URLPrefix, api.requestHandler)
 	})
 	return api
 }
 
 // RegistHandler defines for register open handler
 func (api *OpenAPI) RegistHandler(h Handler) (bool, error) {
-	if existedHandler := funk.Find(api.apis, func(handler Handler) bool {
+	if target := funk.Find(api.apis, func(handler Handler) bool {
 		return (handler.Name == h.Name) && (handler.Version == h.Version)
-	}); existedHandler != nil {
-		rushLogger.Warn("handler has existedd %s", existedHandler)
-		return false, fmt.Errorf("handler has existedd %s", existedHandler)
+	}); target != nil {
+		rushLogger.Warn("handler has existedd %s", target)
+		return false, fmt.Errorf("handler has existedd %s", target)
 	}
 	api.apis = append(api.apis, h)
 	return true, nil
 }
 
 // handle http request
-func (api *OpenAPI) requestHandle(c *gin.Context) {
-	puData, err := getForm(c)
+func (api *OpenAPI) requestHandler(c *gin.Context) {
+	puData, err := form(c)
 	if err != nil {
-		rushLogger.Warn("getForm error %s", err.Error())
+		rushLogger.Warn("form error %s", err.Error())
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -154,7 +155,7 @@ func (api *OpenAPI) findVoke(method string, version string) (Voke, error) {
 	return v, nil
 }
 
-func (api *OpenAPI) appAuth(puData *CRP, c *gin.Context) (*AppInfo, error) {
+func (api *OpenAPI) appAuth(puData *Form, c *gin.Context) (*AppInfo, error) {
 	if appKeySecret, err := api.Auth(puData.AppID); err == nil {
 		if err := rsaVerify(puData, appKeySecret); err != nil {
 			rushLogger.Warn("rsaVerify error %s", err.Error())

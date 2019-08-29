@@ -20,6 +20,8 @@ import (
 	"net/http"
 	"sort"
 
+	"github.com/gin-gonic/gin/binding"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -97,21 +99,21 @@ func map2SignString(puData interface{}) string {
 	return signString
 }
 
-func getForm(c *gin.Context) (*CRP, error) {
-	puData := &CRP{}
+func form(c *gin.Context) (*Form, error) {
+	puData := &Form{}
 	if c.Request.Method != "POST" {
 		if err := c.ShouldBindQuery(puData); err != nil {
 			return nil, err
 		}
 	} else {
-		if err := c.ShouldBind(puData); err != nil {
+		if err := c.ShouldBindBodyWith(puData, binding.JSON); err != nil {
 			return nil, err
 		}
 	}
 	return puData, nil
 }
 
-func rsaVerify(puData *CRP, appKeySecret *AppInfo) error {
+func rsaVerify(puData *Form, appKeySecret *AppInfo) error {
 	sign := puData.Sign
 	signString := map2SignString(puData)
 	if pubkey, err := pubKeyFromByte([]byte(appKeySecret.PublicKey)); err == nil {
